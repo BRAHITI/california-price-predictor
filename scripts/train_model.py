@@ -13,3 +13,5 @@ model = train_model(X, y)
 # Sauvegarder le modèle
 save_model(model)
 print("Modèle entraîné et sauvegardé !")
+
+

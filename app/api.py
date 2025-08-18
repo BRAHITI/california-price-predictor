@@ -1,11 +1,13 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from app.model import load_model
-from app.utils import create_dataframe_from_dict, preprocess_data
 
 app = FastAPI()
+
+# Charger le modèle une seule fois au démarrage
 model = load_model()
 
+# Modèle de données pour POST
 class HouseData(BaseModel):
     MedInc: float
     HouseAge: float
@@ -16,9 +18,17 @@ class HouseData(BaseModel):
     Latitude: float
     Longitude: float
 
+# Route GET pour tester si l'API fonctionne
+@app.get("/")
+def read_root():
+    return {"message": "API FastAPI fonctionne !"}
+
+# Route POST pour prédiction
 @app.post("/predict")
 def predict(data: HouseData):
-    df = create_dataframe_from_dict(data.dict())
-    df = preprocess_data(df)
-    prediction = model.predict(df)
-    return {"prediction": prediction[0]}
+    X = [[
+        data.MedInc, data.HouseAge, data.AveRooms, data.AveBedrms,
+        data.Population, data.AveOccup, data.Latitude, data.Longitude
+    ]]
+    prediction = model.predict(X)[0]
+    return {"prediction": prediction}
