@@ -71,12 +71,12 @@ california-price-predictor/
 │  ├─ api.py            # API FastAPI
 │  ├─ model.py          # Chargement et prédiction du modèle
 │  ├─ utils.py          # Fonctions utilitaires (prétraitement)
-│  ├─ train_model.py    # Entraînement et sauvegarde du modèle
 │  └─ streamlit_app.py  # Interface Streamlit
 │
 ├─ scripts/
 │  └─ train_model.py    # Script pour entraîner le modèle
-│
+├─ tests/
+│  └─ ttest_api.py
 ├─ model.joblib         # Modèle entraîné (généré après exécution)
 ├─ requirements.txt     # Dépendances Python
 ├─ setup.sh             # Script d’initialisation du projet
