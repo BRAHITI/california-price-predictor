@@ -190,7 +190,7 @@ streamlit run app/streamlit_app.py
 
 **2.** L’interface web sera accessible ici :
 ```bash
-http://localhost:8502
+http://localhost:8501
 ```
 
 
@@ -245,4 +245,72 @@ pydantic
     Assurez-vous que l’environnement virtuel actif correspond à celui utilisé pour installer les dépendances.
 
     Si le modèle model.joblib a été généré avec une autre version de Python, supprimez-le et réentraînez-le avec votre version actuelle.
+
 ```
+
+## 🚀 Evolution du projet
+
+**1.** Créer une nouvelle branche
+
+Exemple de création de branche :
+
+```bash
+git checkout -b feature/train-test-split
+```
+
+**2.** Valider la branche
+
+Si tout est bon, commiter et push la branche vers le dépôt github :
+
+```bash
+git add .
+git commit -m "Ajout du split train/test avec random_state pour reproductibilité"
+git push origin feature/train-test-split
+
+```
+
+Ensuite, sur GitHub, tu pourras créer une Pull Request pour merger cette branche dans main.
+
+
+  **1.** Créer un Pull Request (PR)
+
+  Va sur ton dépôt GitHub.
+
+  Tu verras un bouton Compare & pull request pour ta branche.
+
+  Clique dessus, ajoute un titre et une description.
+
+  Assigne une ou plusieurs personnes comme reviewers.
+
+
+  **2.** Relecture et approbation
+
+  Les reviewers peuvent commenter, demander des changements ou approuver le PR.
+
+  Tu peux faire des commits supplémentaires sur la branche si tu corriges quelque chose ; ils se mettront automatiquement dans le PR.
+
+
+  **3.** Fusionner la branche
+
+  Une fois que la PR est approuvée, tu peux la merge dans la branche principale (main ou master) via GitHub.
+
+  Ensuite, tu peux supprimer la branche si elle n’est plus nécessaire :
+
+```bash
+git branch -d feature/train-test-split       # locale
+git push origin --delete feature/train-test-split  # distante
+```
+
+Depuis le projet local :
+
+**1.** Retourner sur la branche principale (main) :
+
+```bash
+git checkout main
+```
+**2.** Récupérer les derniers changements depuis GitHub :
+
+```bash
+git pull origin main
+```
+

@@ -14,5 +14,5 @@
 Response body
 Download
 {
-  "prediction": 4.13164641129476
+  "prediction": 4.1519383982774585
 }
