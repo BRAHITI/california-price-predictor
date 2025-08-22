@@ -196,7 +196,7 @@ http://localhost:8501
 
 ## 📓 Utiliser Jupyter Notebooks pour l’analyse exploratoire
 
-**1.**Installer Jupyter si ce n’est pas déjà fait :
+**1.** Installer Jupyter si ce n’est pas déjà fait :
     
 ```bash
 pip install notebook ipykernel
@@ -314,3 +314,22 @@ git checkout main
 git pull origin main
 ```
 
+Test effectués : 
+
+Tests API
+
+- test_root_endpoint → Vérifie que / fonctionne.
+
+- test_predict_valid_data → Vérifie une prédiction avec de bonnes données.
+
+- test_predict_invalid_data → Vérifie qu’une donnée invalide renvoie bien une erreur 422.
+
+- test_predict_missing_field → Vérifie qu’un champ manquant renvoie une erreur 422.
+
+Tests Modèle
+
+- test_model_loads → Vérifie que le modèle est bien chargé.
+
+- test_model_prediction_float → Vérifie qu’une prédiction renvoie bien un float.
+
+- test_model_prediction_reproducibility → Vérifie que deux prédictions identiques donnent le même résultat.
