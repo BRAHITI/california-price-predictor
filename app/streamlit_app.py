@@ -25,6 +25,4 @@ if st.button("Prédire"):
         "Longitude": Longitude,
     }
     response = requests.post("http://127.0.0.1:8000/predict", json=data)
-    st.success(
-        f"Prix prédit : {response.json()['prediction']:.3f} (en dizaines de milliers de $)"
-    )
+    st.success(f"Prix prédit : {response.json()['prediction']:.3f} (en dizaines de milliers de $)")
