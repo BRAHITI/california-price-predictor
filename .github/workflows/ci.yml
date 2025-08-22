@@ -24,7 +24,6 @@ jobs:
       - name: Uninstall starlette if exists
         run: pip uninstall -y starlette
 
-
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
