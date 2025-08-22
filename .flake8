@@ -1,3 +1,13 @@
 [flake8]
-max-line-length = 120
-ignore = E203, E266, E501, W503, F403, F401
+max-line-length = 100
+extend-ignore = E501, F401, E402, E401
+exclude = 
+    .git,
+    __pycache__,
+    env,
+    env-california-price-predictor,
+    venv,
+    .venv,
+    .mypy_cache,
+    .pytest_cache,
+    env-california-price-predictor,
