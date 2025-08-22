@@ -30,6 +30,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Check versions
+        run: pip show fastapi starlette
+
+
       # Étape 1 : Vérification du formatage avec black
       - name: Run black (check mode)
         run: |
