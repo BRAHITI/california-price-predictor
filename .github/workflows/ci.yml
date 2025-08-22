@@ -33,8 +33,11 @@ jobs:
       - name: Run flake8
         run: |
           flake8 .
+      #Etape 3 : 
+      - name: Train model
+        run: python -m scripts.train_model
 
-      # Étape 3 : Lancer les tests pytest
+      # Étape 4 : Lancer les tests pytest
       # commentaire pour test de lancement de ci.yml
       - name: Run pytest
         run: |
