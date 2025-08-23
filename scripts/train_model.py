@@ -21,8 +21,8 @@ model = train_model(X_train, y_train)
 y_pred = model.predict(X_test)
 
 # calcul des métriques
-#rmse = mean_squared_error(y_test, y_pred, squared=False)
-mse=mean_squared_error(y_test, y_pred)
+# rmse = mean_squared_error(y_test, y_pred, squared=False)
+mse = mean_squared_error(y_test, y_pred)
 r2 = r2_score(y_test, y_pred)
 
 print(f"MSE: {mse:.2f}")
@@ -32,5 +32,3 @@ print(f"R²: {r2:.2f}")
 # Sauvegarder le modèle
 save_model(model)
 print("Modèle entraîné et sauvegardé !")
-
-

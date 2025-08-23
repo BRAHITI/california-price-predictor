@@ -1,0 +1,55 @@
+name: CI - Tests & Lint
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+      - name: Uninstall starlette if exists
+        run: pip uninstall -y starlette
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi==0.104.0
+          pip install "starlette>=0.27.0,<0.28.0"
+          pip install -r requirements.txt
+
+      - name: Check versions
+        run: pip show fastapi starlette
+
+
+      # Étape 1 : Vérification du formatage avec black
+      - name: Run black (check mode)
+        run: |
+          black --check .
+
+      # Étape 2 : Vérification qualité du code avec flake8
+      - name: Run flake8
+        run: |
+          flake8 .
+      #Etape 3 : 
+      - name: Train model
+        run: python -m scripts.train_model
+
+      # Étape 4 : Lancer les tests pytest
+      # commentaire pour test de lancement de ci.yml
+      - name: Run pytest
+        run: |
+          pytest
