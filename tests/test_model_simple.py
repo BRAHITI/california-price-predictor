@@ -1,9 +1,11 @@
 import numpy as np
 from app.model import load_model
 
+
 def test_model_loads():
     model = load_model()
     assert model is not None
+
 
 def test_model_prediction():
     model = load_model()
