@@ -333,3 +333,24 @@ Tests Modèle
 - test_model_prediction_float → Vérifie qu’une prédiction renvoie bien un float.
 
 - test_model_prediction_reproducibility → Vérifie que deux prédictions identiques donnent le même résultat.
+
+
+Tests, lightings et formatage :
+
+1. Lancer les tests :
+```bash
+pytest tests/ --maxfail=1 --disable-warnings -v
+```
+
+2. Vérification le linting et le formatage 
+
+```bash
+black --check .
+flake8 .
+```
+
+3. Formatage :
+
+```bash
+black .
+```
