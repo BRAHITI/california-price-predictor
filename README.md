@@ -354,3 +354,222 @@ flake8 .
 ```bash
 black .
 ```
+
+Dockerisation (création d'une image de ton app)
+
+1. Installation Docker :
+Sur Linux (Ubuntu) :
+
+```bash
+sudo apt update
+sudo apt install docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+# Vérifier
+docker --version
+
+```
+
+2. Création d'un fichier Dockerfile à la racine du projet 
+Dockerfile permet de créer l'image.
+
+```bash
+# Utilise Python 3.10
+FROM python:3.10
+
+# Crée un dossier pour ton app
+WORKDIR /app
+
+# Copie requirements.txt et installe les dépendances
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copie tout ton projet dans le conteneur
+COPY . .
+
+# Lancer FastAPI avec uvicorn
+CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+3. Construction de l’image Docker (en local) 
+
+```bash
+docker build -t california-price-predictor .
+```
+
+Verification que FastAPI tourne dans DOCKER :
+
+4. Vérification de l'image :
+```bash
+docker images
+```
+5. Lancement du conteneur 
+```bash
+docker run -p 8000:8000 california-price-predictor
+```
+
+6. Tester l’API :
+```bash
+http://localhost:8000
+
+```
+7. Arrêter le conteneur :
+Si tu veux arrêter le conteneur qui tourne en arrière-plan, d’abord liste les conteneurs :
+```bash
+docker ps
+
+```
+Puis arrête-le avec :
+
+```bash
+docker stop <container_id>
+
+```
+
+
+
+
+Schésma simplifié :
+
+```bash
+┌───────────────────────────────┐
+│       Ton dossier local        │
+│   (app/, tests/, requirements) │
+└───────────────┬───────────────┘
+                │ COPY . .
+                ▼
+┌───────────────────────────────┐
+│        Conteneur Docker        │
+│        WORKDIR = /app          │
+│   Tous les fichiers sont ici   │
+└───────────────┬───────────────┘
+                │ docker build -t california-price-predictor .
+                ▼
+┌───────────────────────────────┐
+│         Image Docker           │
+│ - Contient Python              │
+│ - Contient dépendances         │
+│ - Contient ton code et scripts │
+└───────────────┬───────────────┘
+                │ docker run
+                ▼
+┌───────────────────────────────┐
+│      Conteneur en exécution   │
+│ - Lancer ton API FastAPI      │
+│ - Exécuter les tests          │
+│ - Déployer sur un serveur     │
+└───────────────────────────────┘
+
+```
+
+Schéma visuel PC -> Docker -> API -> Prédiction :
+```bash
+
++---------------------+       +-------------------------+       +-----------------+
+|                     |       |                         |       |                 |
+|   Votre ordinateur  | <-->  |  Conteneur Docker       | <-->  |  API FastAPI    |
+|   (localhost)       |       |  "california-price-    |       |  avec modèle    |
+|                     |       |  predictor"             |       |  entraîné       |
++---------------------+       +-------------------------+       +-----------------+
+          |                                |                             |
+          | HTTP GET / POST                | Exécution des endpoints      |
+          |-------------------------------->                             |
+          |                                |                             |
+          | <------------------------------|                             |
+          |  JSON réponse (prediction)     |                             |
+          |                                |                             |
+```
+
+Explication :
+
+1°) Votre PC
+
+-Tu envoies des requêtes HTTP (GET, POST) depuis le navigateur ou curl.
+
+2°) Docker
+
+-Conteneur isolé contenant tout ton projet Python + FastAPI.
+
+-Il reçoit tes requêtes et les transmet à FastAPI.
+
+3°) API FastAPI
+
+-Expose les endpoints / et /predict.
+
+
+
+-Charge le modèle et retourne la prédiction sous forme de JSON.
+
+4°) Retour vers votre PC
+
+- Docker envoie la réponse au navigateur ou terminal.
+
+
+
+
+Sauvegarde et recharge d'une image Docker :
+
+1. Sauvegarde :
+
+Supposons que l'image "california-price-predictor" est déjà construite :
+
+```bash
+docker save -o california-price-predictor.tar california-price-predictor:latest
+
+```
+
+2 Recharge 
+
+```bash
+docker load -i california-price-predictor.tar
+```
+
+
+Création d'un docker-compose.yml :
+Il permet d'automatiser la création d'une image et d'un conteneur dans environnement cloud
+
+```bash
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: california-price-predictor
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    command: uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload
+```
+
+
+Vérifier la syntaxe
+
+```bash
+docker-compose config
+```
+
+Construire les images (sans exécuter)
+
+
+Lancer en mode détaché
+Démarre les conteneurs en arrière-plan.
+```bash
+docker-compose up -d
+```
+voir l’état avec :
+
+```bash
+docker-compose ps
+```
+
+Tester l’application
+```bash
+http://localhost:8000/docs
+```
+
+Arrêter proprement
+```bash
+docker-compose down
+```
+

@@ -3,3 +3,10 @@ __pycache__/
 *.pyc
 *.pkl
 *.joblib
+#ajout des fichier .tar
+*.tar
+*.log
+*.cache
+*.sqlite
+*.db
+.env
