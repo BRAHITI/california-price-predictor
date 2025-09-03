@@ -282,9 +282,9 @@ Ensuite, sur GitHub, tu pourras créer une Pull Request pour merger cette branch
 
   Va sur ton dépôt GitHub.
 
-  Tu verras un bouton Compare & pull request pour ta branche.
+  Tu verras un bouton "Compare & pull request" pour ta branche.
 
-  Clique dessus, ajoute un titre et une description.
+  Clique dessus, ajoute un titre et une description. Clique sur le bouton "Create pull request"
 
   Assigne une ou plusieurs personnes comme reviewers.
 
@@ -298,7 +298,7 @@ Ensuite, sur GitHub, tu pourras créer une Pull Request pour merger cette branch
 
   **3.** Fusionner la branche
 
-  Une fois que la PR est approuvée, tu peux la merge dans la branche principale (main ou master) via GitHub.
+  Une fois que la PR est approuvée, tu peux la merger dans la branche principale (main ou master) via GitHub en cliquant sur le bouton "Merge pull request", ensuite sur "Confirm merge".
 
   Ensuite, tu peux supprimer la branche si elle n’est plus nécessaire :
 
@@ -642,7 +642,78 @@ Automatiser avec docker-compose → un docker-compose.yml qui orchestre FastAPI 
 
 
 
+🚀 Étapes pour déployer sur Render
 
+1. Préparer le Dockerfile pour Render
 
+👉 Render fournit automatiquement une variable d’environnement PORT. Tu dois donc adapter ton CMD :
 
+```bash
+CMD ["sh", "-c", "uvicorn app.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
+```
 
+2. Vérifier en local avec Docker Compose
+
+Avant d’envoyer dans Render, teste que tout marche encore chez toi :
+
+```bash
+docker-compose down -v
+docker-compose up --build
+
+```
+
+3. Créer un dépôt GitHub propre
+
+Vérifie que ton projet est bien versionné.
+
+Ajoute un .dockerignore (important pour éviter d’envoyer plein de fichiers inutiles) :
+```bash
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.git
+.gitignore
+Dockerfile
+docker-compose.yml
+
+```
+(on ignore docker-compose.yml car Render n’en a pas besoin, juste Dockerfile)
+
+4. Créer un compte sur Render
+
+- Va sur 👉 https://render.com
+- Inscris-toi (GitHub login conseillé).
+- Donne accès à ton repo GitHub.
+
+5. Créer un nouveau service Render
+
+5.1 Clique New → Web Service.
+
+5.2 Choisis ton repo GitHub (ici le nom du repository est : california-price-predictor).
+
+5.3 Configure :
+
+- Environment : Docker.
+- Region : proche de toi (ici : Frankfurt (EU Central)).
+- Instance Type : gratuit (Free) pour commencer.
+
+6. Variables d’environnement
+
+Dans Render → Settings → Environment :
+
+- Si ton app a besoin de variables (exemple : credentials, API keys), ajoute-les ici.
+- Pour l’instant, tu n’as pas besoin de plus que le PORT que Render gère déjà.
+
+7. Déploiement automatique
+
+- Render build ton image à partir de Dockerfile.
+- Ensuite il lance la commande CMD définie dedans.
+- Si tout est bon, tu verras un log de build, puis Your service is live.
+
+8. Tester ton API en ligne
+
+- Render te donne une URL, ex : https://california-price-predictor.onrender.com.
+- Tu pourras tester ton API avec /docs (Swagger UI).
+👉 Exemple : https://california-price-predictor.onrender.com/docs.
