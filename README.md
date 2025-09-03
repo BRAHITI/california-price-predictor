@@ -227,23 +227,21 @@ Python (california-predictor)
 
 ```bash
 
-Python 3.10+
-
-scikit-learn
-
-pandas
-
-numpy
-
-fastapi
-
-uvicorn
-
-streamlit
-
-joblib
-
-pydantic
+fastapi==0.115.5
+starlette==0.41.0
+uvicorn==0.30.6
+httpx==0.27.2
+pytest==8.4.1
+anyio==3.7.1
+numpy==1.23.5
+pandas==1.5.3
+scikit-learn==1.2.2
+joblib==1.2.0
+python-multipart==0.0.6
+flake8==7.3.0
+black==23.12.0
+protobuf==3.20.3
+streamlit==1.24.0
 ```
 
 ## 📌 Notes
@@ -455,6 +453,17 @@ docker rm <container_id>
 
 ```
 
+Parfois le port 8000 est utilisé par FastAPI et Streamlit en local alors que il n'y aucun conteneur quin tourne.
+Le test en local de FastAPI et streamlit affichera un message d'erreur indiquant que le port 8000 est déjà utilisé.
+Dans ce cas là, il faut identifier les service utilisant le port 800 avec la commande suivante :
+```bash
+sudo lsof -i :8000
+```
+Ensuite, il faut arrêter les processus qui utilisent le port 8000 :
+
+```bash
+sudo kill -9 PID
+```
 
 Schésma simplifié :
 
@@ -621,8 +630,50 @@ docker rmi -f $(docker images -q)
 ```
 
 
+Création d'un deuxieme Dockerfile "Dockerfile.streamlit" pour le service streamlit :
+Render ne sait pas exécuter 2 serivces dans le mê fichier Dockerfile.
 
+```bash
+FROM python:3.10
 
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+EXPOSE 8501
+
+# Render définit automatiquement $PORT
+CMD ["sh", "-c", "streamlit run app/streamlit_app.py --server.port ${PORT:-8501} --server.address 0.0.0.0"]
+
+```
+
+✅ Tester en local Dockerfile.streamlit
+1. COnstruction de l'image :
+
+```bash
+docker build -f Dockerfile.streamlit -t california-streamlit .
+```
+👉 -f Dockerfile.streamlit dit à Docker d’utiliser ce fichier au lieu de Dockerfile.
+
+2/Lancement du conteneur :
+```bash
+docker run -p 8501:8501 california-streamlit
+```
+
+Tu exposes bien 8501 côté hôte et côté conteneur.
+Ensuite, ouvre http://localhost:8501
+Ton app Streamlit doit s’afficher.
+=> aucun résultat ne sera affiché depuis la page web streamlit car le service FastAPI n'est pas lancé.
+Pour tester correctement, il faut lancer les deux services au même temps avec la commande suivante :
+```bash
+docker-compose up --build
+```
 
 ✅ Bilan corrigé et commenté
 
