@@ -147,7 +147,7 @@ python -m scripts.train_model
 
 ```
 
-Cela sauvegardera le modèle entraîné dans model.joblib.
+Cela sauvegardera le modèle entraîné dans model.joblib dans la raceine du projet.
 
 
 ## 🚀 Tester l’API FastAPI
@@ -187,6 +187,12 @@ le résultat devrait être :
 ```bash
 streamlit run app/streamlit_app.py
 ```
+Si un message d'erreur lié à protobuf, il y'a une solution de contournement qui permet d'exporter ka variable d'environnement (exécute cette dernière commande d'abord):
+**1.** Lancer Streamlit :
+```bash
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
+```
+
 
 **2.** L’interface web sera accessible ici :
 ```bash
@@ -363,6 +369,7 @@ Sur Linux (Ubuntu) :
 ```bash
 sudo apt update
 sudo apt install docker.io
+sudo apt install docker-compose-plugin
 sudo systemctl start docker
 sudo systemctl enable docker
 # Vérifier
@@ -371,6 +378,7 @@ docker --version
 ```
 
 2. Création d'un fichier Dockerfile à la racine du projet 
+
 Dockerfile permet de créer l'image.
 
 ```bash
@@ -391,7 +399,7 @@ COPY . .
 CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-3. Construction de l’image Docker (en local) 
+3. Construction de l’image Docker manuellement (en local) 
 
 ```bash
 docker build -t california-price-predictor .
@@ -404,8 +412,23 @@ Verification que FastAPI tourne dans DOCKER :
 docker images
 ```
 5. Lancement du conteneur 
+Si le fichier Dockerfile est déjà défini alors on exécute la commande :
 ```bash
-docker run -p 8000:8000 california-price-predictor
+docker run -p 8000:8000 -p 8501:8501 california-price-predictor
+```
+La commande suivante exécute celle définies ans le point 3. et 5. :
+```bash
+docker-compose up --build
+```
+
+Supprimer un image :
+```bash
+docker rmi <image_ID>
+```
+Supprimer toutes les images inutilisées :
+```bash
+docker image prune -a
+
 ```
 
 6. Tester l’API :
@@ -426,7 +449,11 @@ docker stop <container_id>
 
 ```
 
+Supprimer un contenuer 
+```bash
+docker rm <container_id>
 
+```
 
 
 Schésma simplifié :
@@ -526,6 +553,7 @@ docker load -i california-price-predictor.tar
 
 
 Création d'un docker-compose.yml :
+
 Il permet d'automatiser la création d'une image et d'un conteneur dans environnement cloud
 
 ```bash
@@ -552,7 +580,8 @@ docker-compose config
 Construire les images (sans exécuter)
 
 
-Lancer en mode détaché
+Lancer en mode détaché :
+
 Démarre les conteneurs en arrière-plan.
 ```bash
 docker-compose up -d
@@ -572,4 +601,48 @@ Arrêter proprement
 ```bash
 docker-compose down
 ```
+
+
+1️⃣ Nettoyer les anciennes images et conteneurs
+
+Avant de lancer quoi que ce soit, assure-toi qu’il n’y a pas de conflit :
+
+```bash
+# Arrêter tous les conteneurs en cours
+docker stop $(docker ps -aq)
+
+# Supprimer tous les conteneurs
+docker rm $(docker ps -aq)
+
+# Supprimer toutes les images de ton projet (facultatif mais propre)
+docker rmi -f $(docker images -q)
+
+
+```
+
+
+
+
+
+✅ Bilan corrigé et commenté
+
+Tester FastAPI en local → uvicorn app.api:app --reload
+
+Tester Streamlit en local → streamlit run app/streamlit_app.py
+
+Construire une image → docker build -t california-price-predictor .
+
+Lancer un conteneur FastAPI seul → docker run -d -p 8000:8000 --name cp-api california-price-predictor
+
+Lancer un conteneur Streamlit seul (optionnel) → docker run -d -p 8501:8501 --name cp-web california-price-predictor streamlit run app/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+
+Automatiser avec docker-compose → un docker-compose.yml qui orchestre FastAPI + Streamlit.
+
+
+
+
+
+
+
+
 
