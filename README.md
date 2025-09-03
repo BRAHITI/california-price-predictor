@@ -465,6 +465,7 @@ Ensuite, il faut arrêter les processus qui utilisent le port 8000 :
 sudo kill -9 PID
 ```
 
+
 Schésma simplifié :
 
 ```bash
