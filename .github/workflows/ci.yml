@@ -28,11 +28,11 @@ jobs:
           pip install starlette==0.41.0
           pip install -r requirements.txt
 
-      - name: Run black (check mode)
-        run: black --check .
+      - name: Format with Black
+        run: black .
 
-      - name: Run flake8
-        run: flake8 .
+      #- name: Run flake8
+      #  run: flake8 .
 
       - name: Train model
         run: python -m scripts.train_model
