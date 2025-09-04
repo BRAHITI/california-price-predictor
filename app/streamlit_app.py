@@ -31,14 +31,14 @@ if st.button("Prédire"):
         "Longitude": Longitude,
     }
     # remplacement de l'URL en dur par la variable API_URL
-    #response = requests.post("http://api:8000/predict", json=data)
+    # response = requests.post("http://api:8000/predict", json=data)
     ##response = requests.post(API_URL, json=data)
     ##st.success(f"Prix prédit : {response.json()['prediction']:.3f} (en dizaines de milliers de $)")
 
     # Dans ton service Streamlit → Settings → Manage Environment → Add Environment Variable-> Save, rebuild, and deploy :
-    #API_URL=https://california-price-predictor.onrender.com/predict
+    # API_URL=https://california-price-predictor.onrender.com/predict
 
-    #nouvelle correction
+    # nouvelle correction
     st.write("📡 Envoi des données à l’API :", API_URL)
 
 try:
