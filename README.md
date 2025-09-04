@@ -26,23 +26,18 @@ mkdir -p $PROJECT_NAME/{app,tests,scripts,.github/workflows}
 # Création des fichiers dans app/
 touch $PROJECT_NAME/app/__init__.py
 touch $PROJECT_NAME/app/api.py
-touch $PROJECT_NAME/app/streamlit_app.py
 touch $PROJECT_NAME/app/model.py
-#touch $PROJECT_NAME/app/train.py
-#touch $PROJECT_NAME/app/schemas.py
+touch $PROJECT_NAME/app/streamlit_app.py
 touch $PROJECT_NAME/app/utils.py
 
 
 # Tests
-#touch $PROJECT_NAME/tests/__init__.py
 touch $PROJECT_NAME/tests/test_model_simple.py
 touch $PROJECT_NAME/tests/test_placeholder.py
-#touch $PROJECT_NAME/tests/test_utils.py
 
 # Scripts
 touch $PROJECT_NAME/scripts/preprocess.py
 touch $PROJECT_NAME/scripts/train_model.py
-
 
 # GitHub Actions (CI/CD)
 touch $PROJECT_NAME/.github/workflows/ci.yml
@@ -53,7 +48,6 @@ touch $PROJECT_NAME/README.md
 touch $PROJECT_NAME/.gitignore
 
 echo "Structure du projet $PROJECT_NAME créée avec succès ✅"
-
 ```
 
 **2.** Donner les droits d’exécution au script :
@@ -72,7 +66,7 @@ Cela crée automatiquement l’arborescence suivante :
 california-price-predictor/
 │
 ├─ app/
-|  ├─ api.py  
+|  ├─__init__.py         # Création d'un fichier init
 │  ├─ api.py            # API FastAPI
 │  ├─ model.py          # Chargement et prédiction du modèle
 │  ├─ utils.py          # Fonctions utilitaires (prétraitement)
@@ -141,7 +135,6 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-
 ## 📓 Utiliser Jupyter Notebooks pour l’analyse exploratoire
 
 **1.** Installer Jupyter si ce n’est pas déjà fait :
@@ -190,6 +183,9 @@ http://127.0.0.1:8000/docs
 ```
 
 **3.** Exemple de requête POST /predict :
+Sur la ligne POST, on clique sur la fleche tout à droite, ensuite sur le bouton "Try it out".
+Dans le corps de la requête "Request by" on copie les valeurs du dictionnaire suivant
+
 ```bash
 {
   "MedInc": 8.3252,
@@ -201,8 +197,10 @@ http://127.0.0.1:8000/docs
   "Latitude": 37.88,
   "Longitude": -122.23
 }
-
-le résultat devrait être :
+```
+Ensuite onn clique sur Exécute.
+Le résultat devrait être :
+```bash
 {
   "prediction": 4.13164641129476
 }
@@ -212,8 +210,14 @@ le résultat devrait être :
 
 **1.** Lancer Streamlit :
 ```bash
+streamlit run app/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+```
+Ou 
+```bash
 streamlit run app/streamlit_app.py
 ```
+Le fichier streamlit_app.py doit faire appel à l'adresse locale de FastAPI "http://127.0.0.1:8000/predict" mais pas celle prévue pour Docker "http://api:8000/predict".
+
 Si un message d'erreur lié à protobuf, il y'a une solution de contournement qui permet d'exporter la variable d'environnement (exécute cette dernière commande d'abord):
 **1.** Lancer Streamlit :
 ```bash
@@ -224,7 +228,6 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 ```bash
 http://localhost:8501
 ```
-
 
 ## ⚙️ Dépendances principales
 Ci-dessous les dépances principales qui sont validées dans ce projet :
@@ -249,8 +252,8 @@ streamlit==1.24.0
 
 ## 📌 Notes
 ```bash
-    Assurez-vous que l’environnement virtuel actif correspond à celui utilisé pour installer les dépendances.
-    Si le modèle model.joblib a été généré avec une autre version de Python, supprimez-le et réentraînez-le avec votre version actuelle.
+  - Assurez-vous que l’environnement virtuel actif correspond à celui utilisé pour installer les dépendances.
+  - Si le modèle model.joblib a été généré avec une autre version de Python, supprimez-le et réentraînez-le avec votre version actuelle.
 
 ```
 
@@ -276,7 +279,6 @@ git push origin feature/train-test-split
 ```
 
 Ensuite, sur GitHub, tu pourras créer une Pull Request pour merger cette branche dans main.
-
 
   **1.** Créer un Pull Request (PR)
 
@@ -339,7 +341,7 @@ pytest tests/ --maxfail=1 --disable-warnings -v
 
 ```bash
 black --check .
-flake8 .
+#flake8 .
 ```
 
 3. Formatage :
@@ -410,9 +412,6 @@ docker-compose up --build
 ```
 
 
-docker run -p 8000:8000 -p 8501:8501 california-price-predictor
-
-
 Supprimer un image :
 ```bash
 docker rmi <image_ID>
@@ -427,25 +426,41 @@ docker image prune -a
 ```bash
 http://localhost:8000/docs
 ```
-En 
 
 7. Arrêter le conteneur :
 Si tu veux arrêter le conteneur qui tourne en arrière-plan, d’abord liste les conteneurs :
 ```bash
 docker ps
-
 ```
 Puis arrête-le avec :
 
 ```bash
 docker stop <container_id>
-
 ```
 
-Supprimer un contenuer 
+Supprimer un contenueur 
 ```bash
 docker rm <container_id>
+```
 
+Arrêter proprement tous les conteneur
+```bash
+docker-compose down
+```
+
+- Une manière de 1ettoyer les anciennes images et conteneurs
+
+Avant de lancer quoi que ce soit, assure-toi qu’il n’y a pas de conflit :
+
+```bash
+# Arrêter tous les conteneurs en cours
+docker stop $(docker ps -aq)
+
+# Supprimer tous les conteneurs
+docker rm $(docker ps -aq)
+
+# Supprimer toutes les images de ton projet (facultatif mais propre)
+docker rmi -f $(docker images -q)
 ```
 
 Parfois le port 8000 est utilisé par FastAPI et Streamlit en local alors qu'il n'y aucun conteneur qui tourne.
@@ -461,83 +476,6 @@ Ensuite, il faut arrêter les processus qui utilisent le port 8000 :
 ```bash
 sudo kill -9 PID
 ```
-
-
-Schésma simplifié :
-
-```bash
-┌───────────────────────────────┐
-│       Ton dossier local        │
-│   (app/, tests/, requirements) │
-└───────────────┬───────────────┘
-                │ COPY . .
-                ▼
-┌───────────────────────────────┐
-│        Conteneur Docker        │
-│        WORKDIR = /app          │
-│   Tous les fichiers sont ici   │
-└───────────────┬───────────────┘
-                │ docker build -t california-price-predictor .
-                ▼
-┌───────────────────────────────┐
-│         Image Docker           │
-│ - Contient Python              │
-│ - Contient dépendances         │
-│ - Contient ton code et scripts │
-└───────────────┬───────────────┘
-                │ docker run
-                ▼
-┌───────────────────────────────┐
-│      Conteneur en exécution   │
-│ - Lancer ton API FastAPI      │
-│ - Exécuter les tests          │
-│ - Déployer sur un serveur     │
-└───────────────────────────────┘
-
-```
-
-Schéma visuel PC -> Docker -> API -> Prédiction :
-
-```bash
-
-+---------------------+       +-------------------------+       +-----------------+
-|                     |       |                         |       |                 |
-|   Votre ordinateur  | <-->  |  Conteneur Docker       | <-->  |  API FastAPI    |
-|   (localhost)       |       |  "california-price-    |       |  avec modèle    |
-|                     |       |  predictor"             |       |  entraîné       |
-+---------------------+       +-------------------------+       +-----------------+
-          |                                |                             |
-          | HTTP GET / POST                | Exécution des endpoints      |
-          |-------------------------------->                             |
-          |                                |                             |
-          | <------------------------------|                             |
-          |  JSON réponse (prediction)     |                             |
-          |                                |                             |
-```
-
-Explication :
-
-1°) Votre PC
-
--Tu envoies des requêtes HTTP (GET, POST) depuis le navigateur ou curl.
-
-2°) Docker
-
--Conteneur isolé contenant tout ton projet Python + FastAPI.
-
--Il reçoit tes requêtes et les transmet à FastAPI.
-
-3°) API FastAPI
-
--Expose les endpoints / et /predict.
-
--Charge le modèle et retourne la prédiction sous forme de JSON.
-
-4°) Retour vers votre PC
-
-- Docker envoie la réponse au navigateur ou terminal.
-
-
 
 Création d'un docker-compose.yml :
 
@@ -557,54 +495,12 @@ services:
     command: uvicorn app.api:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-
 Vérifier la syntaxe
 
 ```bash
 docker-compose config
 ```
 
-Construire les images (sans exécuter)
-
-Lancer en mode détaché :
-
-Démarre les conteneurs en arrière-plan.
-```bash
-docker-compose up -d
-```
-voir l’état avec :
-
-```bash
-docker-compose ps
-```
-
-Tester l’application
-```bash
-http://localhost:8000/docs
-```
-
-Arrêter proprement
-```bash
-docker-compose down
-```
-
-
-1️⃣ Nettoyer les anciennes images et conteneurs
-
-Avant de lancer quoi que ce soit, assure-toi qu’il n’y a pas de conflit :
-
-```bash
-# Arrêter tous les conteneurs en cours
-docker stop $(docker ps -aq)
-
-# Supprimer tous les conteneurs
-docker rm $(docker ps -aq)
-
-# Supprimer toutes les images de ton projet (facultatif mais propre)
-docker rmi -f $(docker images -q)
-
-
-```
 
 Création d'un deuxieme Dockerfile "Dockerfile.streamlit" pour le service streamlit :
 Render ne sait pas exécuter 2 serivces dans le même fichier Dockerfile.
@@ -630,8 +526,8 @@ CMD ["sh", "-c", "streamlit run app/streamlit_app.py --server.port ${PORT:-8501}
 
 ```
 
-
 ✅ Tester en local Dockerfile.streamlit
+
 1. Construction de l'image :
 
 ```bash
@@ -652,6 +548,7 @@ Pour tester correctement, il faut lancer les deux services au même temps avec l
 ```bash
 docker-compose up --build
 ```
+
 
 
 🚀 Étapes pour déployer FastAPI + Streamlit sur Render
@@ -770,3 +667,82 @@ App Streamlit :
 
 ⚠️ Important : Dans ton streamlit_app.py, les appels à l’API doivent pointer vers l’URL Render de l’API (https://california-price-predictor.onrender.com/predict), et pas http://api:8000. 
 Ce point est géré par la variable "API_URL =https://california-price-predictor.onrender.com/predict" qu'on a créé dans "Manage -> Environment -> Environment la variable".
+
+
+
+
+
+
+Schésma simplifié :
+
+```bash
+┌───────────────────────────────┐
+│       Ton dossier local        │
+│   (app/, tests/, requirements) │
+└───────────────┬───────────────┘
+                │ COPY . .
+                ▼
+┌───────────────────────────────┐
+│        Conteneur Docker        │
+│        WORKDIR = /app          │
+│   Tous les fichiers sont ici   │
+└───────────────┬───────────────┘
+                │ docker build -t california-price-predictor .
+                ▼
+┌───────────────────────────────┐
+│         Image Docker           │
+│ - Contient Python              │
+│ - Contient dépendances         │
+│ - Contient ton code et scripts │
+└───────────────┬───────────────┘
+                │ docker run
+                ▼
+┌───────────────────────────────┐
+│      Conteneur en exécution   │
+│ - Lancer ton API FastAPI      │
+│ - Exécuter les tests          │
+│ - Déployer sur un serveur     │
+└───────────────────────────────┘
+
+```
+
+Schéma visuel PC -> Docker -> API -> Prédiction :
+
+```bash
+
++---------------------+       +-------------------------+       +-----------------+
+|                     |       |                         |       |                 |
+|   Votre ordinateur  | <-->  |  Conteneur Docker       | <-->  |  API FastAPI    |
+|   (localhost)       |       |  "california-price-    |       |  avec modèle    |
+|                     |       |  predictor"             |       |  entraîné       |
++---------------------+       +-------------------------+       +-----------------+
+          |                                |                             |
+          | HTTP GET / POST                | Exécution des endpoints      |
+          |-------------------------------->                             |
+          |                                |                             |
+          | <------------------------------|                             |
+          |  JSON réponse (prediction)     |                             |
+          |                                |                             |
+```
+
+Explication :
+
+1°) Votre PC
+
+-Tu envoies des requêtes HTTP (GET, POST) depuis le navigateur ou curl.
+
+2°) Docker
+
+-Conteneur isolé contenant tout ton projet Python + FastAPI.
+
+-Il reçoit tes requêtes et les transmet à FastAPI.
+
+3°) API FastAPI
+
+-Expose les endpoints / et /predict.
+
+-Charge le modèle et retourne la prédiction sous forme de JSON.
+
+4°) Retour vers votre PC
+
+- Docker envoie la réponse au navigateur ou terminal.
