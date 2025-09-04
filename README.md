@@ -21,31 +21,35 @@ La structure du projet a été générée automatiquement via un script setup.sh
 PROJECT_NAME="price-predictor-california"
 
 # Création des dossiers
-mkdir -p $PROJECT_NAME/{app,tests,.github/workflows}
+mkdir -p $PROJECT_NAME/{app,tests,scripts,.github/workflows}
 
 # Création des fichiers dans app/
 touch $PROJECT_NAME/app/__init__.py
-touch $PROJECT_NAME/app/main.py
+touch $PROJECT_NAME/app/api.py
 touch $PROJECT_NAME/app/streamlit_app.py
 touch $PROJECT_NAME/app/model.py
-touch $PROJECT_NAME/app/train.py
-touch $PROJECT_NAME/app/schemas.py
+#touch $PROJECT_NAME/app/train.py
+#touch $PROJECT_NAME/app/schemas.py
 touch $PROJECT_NAME/app/utils.py
 
 
 # Tests
-touch $PROJECT_NAME/tests/__init__.py
-touch $PROJECT_NAME/tests/test_api.py
-touch $PROJECT_NAME/tests/test_model.py
-touch $PROJECT_NAME/tests/test_utils.py
+#touch $PROJECT_NAME/tests/__init__.py
+touch $PROJECT_NAME/tests/test_model_simple.py
+touch $PROJECT_NAME/tests/test_placeholder.py
+#touch $PROJECT_NAME/tests/test_utils.py
+
+# Scripts
+touch $PROJECT_NAME/scripts/preprocess.py
+touch $PROJECT_NAME/scripts/train_model.py
+
 
 # GitHub Actions (CI/CD)
-touch $PROJECT_NAME/.github/workflows/python-tests.yml
+touch $PROJECT_NAME/.github/workflows/ci.yml
 
 # Fichiers racine
 touch $PROJECT_NAME/requirements.txt
 touch $PROJECT_NAME/README.md
-touch $PROJECT_NAME/pytest.ini
 touch $PROJECT_NAME/.gitignore
 
 echo "Structure du projet $PROJECT_NAME créée avec succès ✅"
@@ -68,18 +72,22 @@ Cela crée automatiquement l’arborescence suivante :
 california-price-predictor/
 │
 ├─ app/
+|  ├─ api.py  
 │  ├─ api.py            # API FastAPI
 │  ├─ model.py          # Chargement et prédiction du modèle
 │  ├─ utils.py          # Fonctions utilitaires (prétraitement)
 │  └─ streamlit_app.py  # Interface Streamlit
 │
 ├─ scripts/
-│  └─ train_model.py    # Script pour entraîner le modèle
+│  ├─ preprocess.py 
+│  ├─ train_model.py    # Script pour entraîner le modèle
 ├─ tests/
-│  └─ ttest_api.py
+│  ├─ test_placeholder.py 
+│  ├─ train_model_simple.py   
 ├─ model.joblib         # Modèle entraîné (généré après exécution)
 ├─ requirements.txt     # Dépendances Python
 ├─ setup.sh             # Script d’initialisation du projet
+├─ .gitignore           # Script permettant d'ingorer certains fichier lors du push dans Github
 └─ README.md            # Documentation
 ```
 
@@ -107,16 +115,13 @@ git commit -m "Initial commit"
 git push -u origin main
 ```
 
-
 ## 📦 Installation
-
 
 **1.** Créer un environnement virtuel Python 3.10+ :
 
 ```bash
 python -m venv env-california-price-predictor
 ```
-
 
 **2.** Activer l’environnement :
 
@@ -130,7 +135,6 @@ Windows :
 .\env-california-price-predictor\Scripts\activate
 ```
 
-
 **3.** Installer les dépendances :
 ```bash
 pip install --upgrade pip
@@ -138,15 +142,38 @@ pip install -r requirements.txt
 ```
 
 
+## 📓 Utiliser Jupyter Notebooks pour l’analyse exploratoire
+
+**1.** Installer Jupyter si ce n’est pas déjà fait :
+    
+```bash
+pip install notebook ipykernel
+```
+
+**2.** Ajouter l’environnement virtuel comme kernel Jupyter :
+
+```bash
+python -m ipykernel install --user --name=env-california-price-predictor --display-name "Python (california-predictor)"
+```
+
+**3.** Créer vos notebooks dans le dossier notebooks/.
+
+**4.** Lorsque vous ouvrez Jupyter (jupyter notebook ou via VSCode), sélectionnez le kernel :
+
+Python (california-predictor)
+
+👉 Cela garantit que vos notebooks utilisent bien les mêmes dépendances que l’application FastAPI et Streamlit.
+
+
 ## 🧠 Entraînement du modèle
 
 Le modèle est basé sur Linear Regression pour prédire le prix médian des maisons.
+Avant de lancer la commande pour l'entrainement du modèle entrainé dans le fichier scripts/train_model.py, on peut créer un notebok train_model.ipynb pour tester les différentes étapes.
 
 ```bash
 python -m scripts.train_model
 
 ```
-
 Cela sauvegardera le modèle entraîné dans model.joblib dans la raceine du projet.
 
 
@@ -187,12 +214,11 @@ le résultat devrait être :
 ```bash
 streamlit run app/streamlit_app.py
 ```
-Si un message d'erreur lié à protobuf, il y'a une solution de contournement qui permet d'exporter ka variable d'environnement (exécute cette dernière commande d'abord):
+Si un message d'erreur lié à protobuf, il y'a une solution de contournement qui permet d'exporter la variable d'environnement (exécute cette dernière commande d'abord):
 **1.** Lancer Streamlit :
 ```bash
 export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 ```
-
 
 **2.** L’interface web sera accessible ici :
 ```bash
@@ -200,33 +226,10 @@ http://localhost:8501
 ```
 
 
-## 📓 Utiliser Jupyter Notebooks pour l’analyse exploratoire
-
-**1.** Installer Jupyter si ce n’est pas déjà fait :
-    
-```bash
-pip install notebook ipykernel
-```
-
-**2.** Ajouter l’environnement virtuel comme kernel Jupyter :
-
-```bash
-python -m ipykernel install --user --name=env-california-price-predictor --display-name "Python (california-predictor)"
-```
-
-**3.** Créer vos notebooks dans le dossier notebooks/.
-
-**4.** Lorsque vous ouvrez Jupyter (jupyter notebook ou via VSCode), sélectionnez le kernel :
-
-Python (california-predictor)
-
-👉 Cela garantit que vos notebooks utilisent bien les mêmes dépendances que l’application FastAPI et Streamlit.
-
-
 ## ⚙️ Dépendances principales
+Ci-dessous les dépances principales qui sont validées dans ce projet :
 
 ```bash
-
 fastapi==0.115.5
 starlette==0.41.0
 uvicorn==0.30.6
@@ -247,7 +250,6 @@ streamlit==1.24.0
 ## 📌 Notes
 ```bash
     Assurez-vous que l’environnement virtuel actif correspond à celui utilisé pour installer les dépendances.
-
     Si le modèle model.joblib a été généré avec une autre version de Python, supprimez-le et réentraînez-le avec votre version actuelle.
 
 ```
@@ -318,28 +320,15 @@ git checkout main
 git pull origin main
 ```
 
+
 Test effectués : 
 
-Tests API
+- test_model_simple
 
-- test_root_endpoint → Vérifie que / fonctionne.
-
-- test_predict_valid_data → Vérifie une prédiction avec de bonnes données.
-
-- test_predict_invalid_data → Vérifie qu’une donnée invalide renvoie bien une erreur 422.
-
-- test_predict_missing_field → Vérifie qu’un champ manquant renvoie une erreur 422.
-
-Tests Modèle
-
-- test_model_loads → Vérifie que le modèle est bien chargé.
-
-- test_model_prediction_float → Vérifie qu’une prédiction renvoie bien un float.
-
-- test_model_prediction_reproducibility → Vérifie que deux prédictions identiques donnent le même résultat.
+- test_placeholder
 
 
-Tests, lightings et formatage :
+Tests, lintings et formatage :
 
 1. Lancer les tests :
 ```bash
@@ -359,9 +348,10 @@ flake8 .
 black .
 ```
 
-Dockerisation (création d'une image de ton app)
+Dockerisation (création d'une image de ton app) :
 
 1. Installation Docker :
+
 Sur Linux (Ubuntu) :
 
 ```bash
@@ -403,7 +393,7 @@ CMD ["uvicorn", "app.api:app", "--host", "0.0.0.0", "--port", "8000"]
 docker build -t california-price-predictor .
 ```
 
-Verification que FastAPI tourne dans DOCKER :
+Verification que FastAPI tourne :
 
 4. Vérification de l'image :
 ```bash
@@ -412,12 +402,16 @@ docker images
 5. Lancement du conteneur 
 Si le fichier Dockerfile est déjà défini alors on exécute la commande :
 ```bash
-docker run -p 8000:8000 -p 8501:8501 california-price-predictor
+docker run -p 8000:8000 california-price-predictor
 ```
-La commande suivante exécute celle définies ans le point 3. et 5. :
+La commande suivante exécute les deux commandes (3. et 5.) :
 ```bash
 docker-compose up --build
 ```
+
+
+docker run -p 8000:8000 -p 8501:8501 california-price-predictor
+
 
 Supprimer un image :
 ```bash
@@ -431,9 +425,10 @@ docker image prune -a
 
 6. Tester l’API :
 ```bash
-http://localhost:8000
-
+http://localhost:8000/docs
 ```
+En 
+
 7. Arrêter le conteneur :
 Si tu veux arrêter le conteneur qui tourne en arrière-plan, d’abord liste les conteneurs :
 ```bash
@@ -453,9 +448,11 @@ docker rm <container_id>
 
 ```
 
-Parfois le port 8000 est utilisé par FastAPI et Streamlit en local alors que il n'y aucun conteneur quin tourne.
+Parfois le port 8000 est utilisé par FastAPI et Streamlit en local alors qu'il n'y aucun conteneur qui tourne.
 Le test en local de FastAPI et streamlit affichera un message d'erreur indiquant que le port 8000 est déjà utilisé.
+
 Dans ce cas là, il faut identifier les service utilisant le port 800 avec la commande suivante :
+
 ```bash
 sudo lsof -i :8000
 ```
@@ -500,6 +497,7 @@ Schésma simplifié :
 ```
 
 Schéma visuel PC -> Docker -> API -> Prédiction :
+
 ```bash
 
 +---------------------+       +-------------------------+       +-----------------+
@@ -533,33 +531,12 @@ Explication :
 
 -Expose les endpoints / et /predict.
 
-
-
 -Charge le modèle et retourne la prédiction sous forme de JSON.
 
 4°) Retour vers votre PC
 
 - Docker envoie la réponse au navigateur ou terminal.
 
-
-
-
-Sauvegarde et recharge d'une image Docker :
-
-1. Sauvegarde :
-
-Supposons que l'image "california-price-predictor" est déjà construite :
-
-```bash
-docker save -o california-price-predictor.tar california-price-predictor:latest
-
-```
-
-2 Recharge 
-
-```bash
-docker load -i california-price-predictor.tar
-```
 
 
 Création d'un docker-compose.yml :
@@ -588,7 +565,6 @@ docker-compose config
 ```
 
 Construire les images (sans exécuter)
-
 
 Lancer en mode détaché :
 
@@ -630,12 +606,12 @@ docker rmi -f $(docker images -q)
 
 ```
 
-
 Création d'un deuxieme Dockerfile "Dockerfile.streamlit" pour le service streamlit :
-Render ne sait pas exécuter 2 serivces dans le mê fichier Dockerfile.
+Render ne sait pas exécuter 2 serivces dans le même fichier Dockerfile.
 
 ```bash
 FROM python:3.10
+
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -654,8 +630,9 @@ CMD ["sh", "-c", "streamlit run app/streamlit_app.py --server.port ${PORT:-8501}
 
 ```
 
+
 ✅ Tester en local Dockerfile.streamlit
-1. COnstruction de l'image :
+1. Construction de l'image :
 
 ```bash
 docker build -f Dockerfile.streamlit -t california-streamlit .
@@ -677,10 +654,8 @@ docker-compose up --build
 ```
 
 
-
-
-
 🚀 Étapes pour déployer FastAPI + Streamlit sur Render
+
 1. Préparer les deux Dockerfile
 
 Dockerfile (FastAPI)
@@ -689,22 +664,8 @@ Déjà en place, avec :
 CMD ["sh", "-c", "uvicorn app.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
 ```
 
-Dockerfile.streamlit (Streamlit)
-À créer à la racine du projet :
-```bash
-FROM python:3.10
+Dockerfile.streamlit (Streamlit) déjà créé ci-dessus à la racine du projet :
 
-WORKDIR /app
-
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-COPY . .
-
-# Render définit automatiquement $PORT → on s'y connecte
-CMD ["sh", "-c", "streamlit run app/streamlit_app.py --server.port $PORT --server.address 0.0.0.0"]
-
-```
 
 2. Vérifier en local avec Docker Compose
 
@@ -713,7 +674,6 @@ Avant Render, tu peux tester les deux services ensemble :
 ```bash
 docker-compose down -v
 docker-compose up --build
-
 ```
 👉 Tu auras :
 
@@ -724,7 +684,6 @@ Streamlit dispo sur http://localhost:8501
 
 Ton .dockerignore doit ressembler à ça :
 
-
 ```bash
 __pycache__/
 *.pyc
@@ -734,15 +693,22 @@ __pycache__/
 .git
 .gitignore
 docker-compose.yml
-
 ```
 ⚠️ NE PAS mettre Dockerfile ni Dockerfile.streamlit dans .dockerignore, sinon Render ne les verra pas.
+
 
 4. Créer un compte Render (déjà fait)
 
 Connexion via GitHub. Donne accès à ton repo california-price-predictor.
 
-5. Créer deux services Render
+5. Création d'un projet + 2 services dans Render
+
+5. 1. Création projet Render
+
+New -> Project
+Nom : california-price-predictor
+
+5. 2. Créer deux services Render
 👉 Service 1 : FastAPI
 
 New → Web Service
@@ -763,7 +729,7 @@ Type : Free
 
 New → Web Service
 
-Repo : california-price-predictor
+Repo : california-price-predictor-streamlit
 
 Branche : feature/streamlit-deploy (ou main si tu as mergé)
 
@@ -774,6 +740,9 @@ Dockerfile Path : Dockerfile.streamlit
 Context Directory : .
 
 Type : Free
+
+Rajouter dans Manage -> Environment -> Environment la variable : API_URL =https://california-price-predictor.onrender.com/predict
+celà permettra d'exécuter streaml selon le contexte loal ou sur render.
 
 6. Variables d’environnement
 
@@ -797,6 +766,7 @@ API FastAPI :
 👉 https://california-price-predictor.onrender.com/docs
 
 App Streamlit :
-👉 https://california-price-predictor-1.onrender.com
+👉 https://california-price-predictor-streamlit.onrender.com
 
-⚠️ Important : Dans ton streamlit_app.py, les appels à l’API doivent pointer vers l’URL Render de l’API (https://california-price-predictor.onrender.com/predict), et pas http://api:8000.
+⚠️ Important : Dans ton streamlit_app.py, les appels à l’API doivent pointer vers l’URL Render de l’API (https://california-price-predictor.onrender.com/predict), et pas http://api:8000. 
+Ce point est géré par la variable "API_URL =https://california-price-predictor.onrender.com/predict" qu'on a créé dans "Manage -> Environment -> Environment la variable".
