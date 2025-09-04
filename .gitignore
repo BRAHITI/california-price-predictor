@@ -10,3 +10,5 @@ __pycache__/
 *.sqlite
 *.db
 .env
+# Ne pas prendre ce fichier dans github
+streamlit_app_test.py
