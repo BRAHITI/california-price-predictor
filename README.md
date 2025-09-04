@@ -676,49 +676,55 @@ Pour tester correctement, il faut lancer les deux services au même temps avec l
 docker-compose up --build
 ```
 
-✅ Bilan corrigé et commenté
-
-Tester FastAPI en local → uvicorn app.api:app --reload
-
-Tester Streamlit en local → streamlit run app/streamlit_app.py
-
-Construire une image → docker build -t california-price-predictor .
-
-Lancer un conteneur FastAPI seul → docker run -d -p 8000:8000 --name cp-api california-price-predictor
-
-Lancer un conteneur Streamlit seul (optionnel) → docker run -d -p 8501:8501 --name cp-web california-price-predictor streamlit run app/streamlit_app.py --server.port=8501 --server.address=0.0.0.0
-
-Automatiser avec docker-compose → un docker-compose.yml qui orchestre FastAPI + Streamlit.
 
 
 
 
+🚀 Étapes pour déployer FastAPI + Streamlit sur Render
+1. Préparer les deux Dockerfile
 
-🚀 Étapes pour déployer sur Render
-
-1. Préparer le Dockerfile pour Render
-
-👉 Render fournit automatiquement une variable d’environnement PORT. Tu dois donc adapter ton CMD :
-
+Dockerfile (FastAPI)
+Déjà en place, avec :
 ```bash
 CMD ["sh", "-c", "uvicorn app.api:app --host 0.0.0.0 --port ${PORT:-8000}"]
 ```
 
+Dockerfile.streamlit (Streamlit)
+À créer à la racine du projet :
+```bash
+FROM python:3.10
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+# Render définit automatiquement $PORT → on s'y connecte
+CMD ["sh", "-c", "streamlit run app/streamlit_app.py --server.port $PORT --server.address 0.0.0.0"]
+
+```
+
 2. Vérifier en local avec Docker Compose
 
-Avant d’envoyer dans Render, teste que tout marche encore chez toi :
+Avant Render, tu peux tester les deux services ensemble :
 
 ```bash
 docker-compose down -v
 docker-compose up --build
 
 ```
+👉 Tu auras :
+
+API dispo sur http://localhost:8000/docs
+Streamlit dispo sur http://localhost:8501
 
 3. Créer un dépôt GitHub propre
 
-Vérifie que ton projet est bien versionné.
+Ton .dockerignore doit ressembler à ça :
 
-Ajoute un .dockerignore (important pour éviter d’envoyer plein de fichiers inutiles) :
+
 ```bash
 __pycache__/
 *.pyc
@@ -727,45 +733,70 @@ __pycache__/
 .env
 .git
 .gitignore
-Dockerfile
 docker-compose.yml
 
 ```
-(on ignore docker-compose.yml car Render n’en a pas besoin, juste Dockerfile)
+⚠️ NE PAS mettre Dockerfile ni Dockerfile.streamlit dans .dockerignore, sinon Render ne les verra pas.
 
-4. Créer un compte sur Render
+4. Créer un compte Render (déjà fait)
 
-- Va sur 👉 https://render.com
-- Inscris-toi (GitHub login conseillé).
-- Donne accès à ton repo GitHub.
+Connexion via GitHub. Donne accès à ton repo california-price-predictor.
 
-5. Créer un nouveau service Render
+5. Créer deux services Render
+👉 Service 1 : FastAPI
 
-5.1 Clique New → Web Service.
+New → Web Service
 
-5.2 Choisis ton repo GitHub (ici le nom du repository est : california-price-predictor).
+Repo : california-price-predictor
 
-5.3 Configure :
+Branche : main
 
-- Environment : Docker.
-- Region : proche de toi (ici : Frankfurt (EU Central)).
-- Instance Type : gratuit (Free) pour commencer.
+Environment : Docker
+
+Dockerfile Path : Dockerfile
+
+Context Directory : .
+
+Type : Free
+
+👉 Service 2 : Streamlit
+
+New → Web Service
+
+Repo : california-price-predictor
+
+Branche : feature/streamlit-deploy (ou main si tu as mergé)
+
+Environment : Docker
+
+Dockerfile Path : Dockerfile.streamlit
+
+Context Directory : .
+
+Type : Free
 
 6. Variables d’environnement
 
-Dans Render → Settings → Environment :
+FastAPI : rien à ajouter (Render fournit déjà $PORT).
 
-- Si ton app a besoin de variables (exemple : credentials, API keys), ajoute-les ici.
-- Pour l’instant, tu n’as pas besoin de plus que le PORT que Render gère déjà.
+Streamlit : rien non plus, $PORT est géré automatiquement.
 
 7. Déploiement automatique
 
-- Render build ton image à partir de Dockerfile.
-- Ensuite il lance la commande CMD définie dedans.
-- Si tout est bon, tu verras un log de build, puis Your service is live.
+Pour chaque service :
 
-8. Tester ton API en ligne
+Render build l’image à partir du bon Dockerfile.
 
-- Render te donne une URL, ex : https://california-price-predictor.onrender.com.
-- Tu pourras tester ton API avec /docs (Swagger UI).
-👉 Exemple : https://california-price-predictor.onrender.com/docs.
+Il lance la commande CMD.
+
+Tu vois le log → si pas d’erreurs, Your service is live 🎉
+
+8. Tester en ligne
+
+API FastAPI :
+👉 https://california-price-predictor.onrender.com/docs
+
+App Streamlit :
+👉 https://california-price-predictor-1.onrender.com
+
+⚠️ Important : Dans ton streamlit_app.py, les appels à l’API doivent pointer vers l’URL Render de l’API (https://california-price-predictor.onrender.com/predict), et pas http://api:8000.
